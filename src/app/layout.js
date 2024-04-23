@@ -14,13 +14,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="h-screen">
+        <div className=" overflow-hidden">
         <Topbar />
-          <div className="flex flex-1">
+          <div className="flex  overflow-hidden">
             <Sidebar />
-            <div className="flex flex-col flex-grow">{children}</div>
+            <div className="flex flex-col flex-grow overflow-scroll">{children}</div>
           </div>
-         
         </div>
       </body>
     </html>

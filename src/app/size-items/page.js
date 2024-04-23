@@ -1,11 +1,11 @@
-"use client"
-import { useState, useEffect } from 'react';
+"use client";
+import { useState, useEffect } from "react";
 
 const SizeItems = () => {
   const [items, setItems] = useState([]);
-  const [category, setCategory] = useState('');
-  const [sizeList, setSizeList] = useState('');
-  const [message, setMessage] = useState('');
+  const [category, setCategory] = useState("");
+  const [sizeList, setSizeList] = useState("");
+  const [message, setMessage] = useState("");
   const [editItem, setEditItem] = useState(null);
 
   useEffect(() => {
@@ -15,134 +15,173 @@ const SizeItems = () => {
 
   const fetchData = async () => {
     try {
-      const response = await fetch('/api/size-template');
+      const response = await fetch("/api/size-template");
       if (response.ok) {
         const data = await response.json();
         setItems(data);
       } else {
-        console.error('Failed to fetch data');
+        console.error("Failed to fetch data");
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error("Error fetching data:", error);
     }
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/size-template', {
-        method: 'POST',
+      const response = await fetch("/api/size-template", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ category, sizeList }),
       });
       if (response.ok) {
-        const data = await response.json();
-        setItems([...items, data]);
-        setCategory('');
-        setSizeList('');
-        setMessage('Item added successfully');
-        setTimeout(() => setMessage(''), 3000); // Clear message after 3 seconds
+        fetchData();
+        setCategory("");
+        setSizeList("");
+        setMessage("Item added successfully");
+        setTimeout(() => setMessage(""), 3000); // Clear message after 3 seconds
       } else {
-        console.error('Failed to add item');
+        console.error("Failed to add item");
       }
     } catch (error) {
-      console.error('Error adding item:', error);
+      console.error("Error adding item:", error);
     }
   };
 
-  const handleDelete = async id => {
+  const handleDelete = async (id) => {
     try {
       const response = await fetch(`/api/size-template`, {
-        method: 'DELETE',
+        method: "DELETE",
         body: JSON.stringify({ id }),
       });
       if (response.ok) {
-        setItems(items.filter(item => item._id !== id));
-        setMessage('Item deleted successfully');
-        setTimeout(() => setMessage(''), 3000); // Clear message after 3 seconds
+        setItems(items.filter((item) => item._id !== id));
+        setMessage("Item deleted successfully");
+        setTimeout(() => setMessage(""), 3000); // Clear message after 3 seconds
       } else {
-        console.error('Failed to delete item');
+        console.error("Failed to delete item");
       }
     } catch (error) {
-      console.error('Error deleting item:', error);
+      console.error("Error deleting item:", error);
     }
   };
 
-  const handleEdit = item => {
+  const handleEdit = (item) => {
     setEditItem(item);
     setCategory(item.category);
-    setSizeList(item.sizeList.join(', '));
+    setSizeList(item.sizeList.join(", "));
   };
 
-  const handleEditSubmit = async e => {
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`/api/size-template/${editItem._id}`, {
-        method: 'PUT',
+      const response = await fetch(`/api/size-template/`, {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ category, sizeList: sizeList.split(',').map(item => item.trim()) }),
+        body: JSON.stringify({
+          id: editItem._id,
+          category,
+          sizeList: sizeList.split(",").map((item) => item.trim()),
+        }),
       });
       if (response.ok) {
         const data = await response.json();
-        setItems(items.map(item => (item._id === data._id ? data : item)));
-        setCategory('');
-        setSizeList('');
-        setMessage('Item updated successfully');
-        setTimeout(() => setMessage(''), 3000); // Clear message after 3 seconds
+        fetchData();
+        setCategory("");
+        setSizeList("");
+        setMessage("Item updated successfully");
+        setTimeout(() => setMessage(""), 3000); // Clear message after 3 seconds
         setEditItem(null);
       } else {
-        console.error('Failed to update item');
+        console.error("Failed to update item");
       }
     } catch (error) {
-      console.error('Error updating item:', error);
+      console.error("Error updating item:", error);
     }
   };
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Size Items</h1>
-      <form onSubmit={handleSubmit} className="mb-4 flex items-center gap-2">
+      <div className="flex gap-10"> <h1 className="text-2xl font-bold mb-4">Size Items</h1>
+      {message && (
+        <p className="text-green-500 mb-4 animate-bounce capitalize">
+          {message}
+        </p>
+      )}</div>
+     
+      <form onSubmit={editItem ? handleEditSubmit :handleSubmit} className="mb-4 flex items-center gap-2">
         <div className="flex items-center">
-          <label htmlFor="category" className="mr-2">Category:</label>
+          <label htmlFor="category" className="mr-2">
+            Category:
+          </label>
           <input
             id="category"
             type="text"
             value={category}
-            onChange={e => setCategory(e.target.value)}
+            onChange={(e) => setCategory(e.target.value)}
             className="border rounded p-2"
             required
           />
         </div>
         <div className="flex items-center">
-          <label htmlFor="sizeList" className="mr-2">Size List:</label>
+          <label htmlFor="sizeList" className="mr-2">
+            Size List:
+          </label>
           <input
             id="sizeList"
             type="text"
             value={sizeList}
-            onChange={e => setSizeList(e.target.value)}
+            onChange={(e) => setSizeList(e.target.value)}
             className="border rounded p-2"
             required
           />
         </div>
-        <button type="submit" className="bg-[#135D66] text-white px-4 py-2 rounded hover:bg-[#003C43]">{editItem ? 'Update Item' : 'Add Item'}</button>
-      </form>
-      {message && <p className="text-green-500 mb-4 animate-bounce capitalize">{message}</p>}
-      <ul>
-        {items.map(item => (
-          <li key={item._id} className="border border-[#77B0AA] p-4 mb-4">
-            <div><strong>Category:</strong> {item.category}</div>
-            <div><strong>Size List:</strong> {item.sizeList ? item.sizeList.join(', ') : 'N/A'}</div> 
+        <button
+          type="submit"
          
+          className="bg-[#135D66] text-white px-4 py-2 rounded hover:bg-[#003C43]"
+        >
+          {editItem ? "Update Item" : "Add Item"}
+        </button>
+      </form>
+      
+      <ul>
+        {items.map((item) => (
+          <li key={item._id} className="border border-[#77B0AA] p-4 mb-4">
+            <div>
+              <strong>Category:</strong> {item.category}
+            </div>
+            <div>
+              <strong>Size List:</strong>{" "}
+              {item.sizeList && item.sizeList.map((subItem,index)=>( <strong key={index}>{subItem},&nbsp;</strong>))}
+            </div>
+
             <div className="mt-2">
-              <button onClick={() => handleDelete(item._id)} className="bg-red-500 text-white px-2 py-1 rounded mr-2 hover:bg-red-600">Delete</button>
-              <button onClick={() => handleEdit(item)} className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Edit</button>
+              <button
+                onClick={() => handleDelete(item._id)}
+                className="bg-red-500 text-white px-2 py-1 rounded mr-2 hover:bg-red-600"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => handleEdit(item)}
+                className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+              >
+                Edit
+              </button>
             </div>
           </li>
         ))}
+        {items.length == 0 && (
+          <div className="flex justify-center items-center border border-[#77B0AA] h-[50vh]">
+            <p className="bold">No Record Found!</p>
+          </div>
+        )}
       </ul>
       {/* {editItem && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
